@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="header">
-      <div class="preview-wrap" :style="{ transform: 'scale(' + transformScale + ')' }">
+      <div class="preview-wrap" :style="{ transform: 'scale(' + transformScale + ') translate(-50%)' }">
         <canvas id="myCanvas" width="1280" height="720"></canvas>
         <template v-for="item of subtitles">
           <!-- 字幕开始出现时间 <= 播放时间 <= 字幕开始出现时间 + 持续时间；例如：字幕出现在第3秒，持续时间5秒，即到第八秒字幕就消失了 -->
@@ -33,23 +33,25 @@
       <!-- <Button @click="huitui">回退到第5秒</Button> -->
     </div>
 
-    <div class="media" v-for="item in demoList" :key="item.id">
-      <div style="width: 258px; height: 192px; background: #000" v-if="item.type == 'video'">
-        <video
+    <div class="media-list-wrap">
+      <div class="media" v-for="item in demoList" :key="item.id">
+        <div style="width: 258px; height: 192px; background: #000" v-if="item.type == 'video'">
+          <video
+            class="media-dom"
+            controls="controls"
+            style="width: 100%; height: 100%"
+            :src="item.src"
+            :custom-id="item.id"
+          ></video>
+        </div>
+        <audio
           class="media-dom"
           controls="controls"
-          style="width: 100%; height: 100%"
+          v-if="item.type == 'audio'"
           :src="item.src"
           :custom-id="item.id"
-        ></video>
+        ></audio>
       </div>
-      <audio
-        class="media-dom"
-        controls="controls"
-        v-if="item.type == 'audio'"
-        :src="item.src"
-        :custom-id="item.id"
-      ></audio>
     </div>
   </div>
 </template>
@@ -296,6 +298,15 @@ export default {
   width: 1280px;
   height: 720px;
   // margin: 0 auto;
+}
+
+.media-list-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  .media {
+    margin-right: 8px;
+  }
 }
 
 #myCanvas {
