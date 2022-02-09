@@ -77,7 +77,7 @@ export default {
         {
           id: 2,
           type: 'video',
-          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2021/09/06/2c/d55abd4c100b078ee2419183621ed3.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20210906T062321Z&X-Amz-SignedHeaders=host&X-Amz-Expires=129600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20210906%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=cd350bd2019716b77bc1448ab2037972b5e94424e6db46e36e6c70ccc5806a03',
+          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2022/02/09/29/89293c335fd78819199498f9cf7b42.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220209T084031Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20220209%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=6679bfbeb199b4e9b2c7566ca0bb1e85f176aadc253280f3e37b4a52028468bd',
           startTime: 0,
           // endTime: 40,
           duration: undefined
@@ -85,19 +85,19 @@ export default {
         {
           id: 1,
           type: 'video',
-          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2021/09/06/73/d22cebcd2789cb9d7a2c9626ff6431.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20210906T062321Z&X-Amz-SignedHeaders=host&X-Amz-Expires=129600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20210906%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=78b235550d8b3b8ac43ed2082a8e2aa23dc8c603c4ce4d7aed8cc7fd06445509',
-          startTime: 24000,
+          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2022/02/09/d8/359b3294d12c65836a2201f3d81c21.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220209T084031Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20220209%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=a6f9289f1186494e6608ec83ec894b1cb25b3d25c4ed39d0a44cefd8f3df3313',
+          startTime: 9000,
           // endTime: 30,
           duration: undefined // 单位毫秒
-        },
-        {
-          id: 3,
-          type: 'audio',
-          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2021/09/06/b6/a576ed7c8a1356ab7b390710e0fd77.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20210906T062321Z&X-Amz-SignedHeaders=host&X-Amz-Expires=129600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20210906%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=530da3f9f56734dcd644b9a53c186fed496cb3e293efde308c84ec8ed4afc3db',
-          startTime: 20000,
-          // endTime: undefined,
-          duration: undefined
         }
+        // {
+        //   id: 3,
+        //   type: 'audio',
+        //   src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2021/09/06/b6/a576ed7c8a1356ab7b390710e0fd77.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20210906T062321Z&X-Amz-SignedHeaders=host&X-Amz-Expires=129600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20210906%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=530da3f9f56734dcd644b9a53c186fed496cb3e293efde308c84ec8ed4afc3db',
+        //   startTime: 20000,
+        //   // endTime: undefined,
+        //   duration: undefined
+        // }
       ],
       subtitles: [
         {
@@ -270,7 +270,7 @@ export default {
 
     let that = this;
     that.$nextTick(() => {
-      that.mediaDoms = document.getElementsByClassName('media-dom');
+      that.mediaDoms = document.querySelectorAll('.media-dom');
       that.mediaDoms.forEach((item, index) => {
         item.oncanplay = function () {
           that.disabledBtn = false;
