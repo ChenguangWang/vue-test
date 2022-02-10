@@ -27,6 +27,11 @@ const routes = [
     path: '/testGl',
     name: 'testGl',
     component: () => import('@/views/test-gl/TestGl.vue')
+  },
+  {
+    path: '/testRegl',
+    name: 'testRegl',
+    component: () => import('@/views/test-regl/TestRegl.vue')
   }
 ];
 

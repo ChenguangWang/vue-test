@@ -5,6 +5,8 @@
     <router-link to="/testVideo">视频测试</router-link>
     <br />
     <router-link to="/testGl">GL测试</router-link>
+    <br />
+    <router-link to="/testRegl">REGL测试</router-link>
   </div>
 </template>
 
