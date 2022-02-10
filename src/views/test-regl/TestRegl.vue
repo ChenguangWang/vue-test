@@ -40,23 +40,25 @@ export default {
     // });
     const delay = 1;
     const duration = 1.5;
+    // 可调整不同转场 https://www.cnblogs.com/nlsoft/p/12059458.html
+    let transName = 'doorway';
     const regl = createREGL(document.querySelector('canvas'));
-    const transitions = GLTransitions.map((t) => createREGLTransition(regl, t));
-    console.log('transitions====>>>', transitions);
+    const transitions = GLTransitions.filter((t) => t.name == transName);
+    const transitionFunc = createREGLTransition(regl, transitions[0]);
     const videos = this.videoSrcs.map(createVedio);
     setTimeout(() => {
       // 延迟一下，等video加载完
-      regl.frame(({ time }) => {
+      let tick = regl.frame(({ time }) => {
         const slides = videos.map((video) => regl.texture(video).subimage(video));
+        console.log('slides====>>>', slides);
         const index = Math.floor(time / (delay + duration));
         const from = slides[index % slides.length];
         const to = slides[(index + 1) % slides.length];
-        const transition = transitions[index % transitions.length];
         const total = delay + duration;
         const progress = Math.max(0, (time - index * total - delay) / duration);
-
-        transition({ progress, from, to });
+        transitionFunc({ progress, from, to });
       });
+      tick.cancel();
     }, 1000);
   }
 };
