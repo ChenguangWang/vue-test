@@ -30,6 +30,7 @@
       <Button @click="stop" style="margin: 0 24px">暂停</Button>
       <InputNumber :max="10" :min="1" v-model="jumpTimeSecond"></InputNumber>
       <Button type="text" @click="jumpSecond">跳转</Button>
+      <Button @click="testEffects">测试</Button>
       <!-- <Button @click="huitui">回退到第5秒</Button> -->
     </div>
 
@@ -57,8 +58,15 @@
 </template>
 
 <script>
+// 拖拽组件
+import VueDraggableResizable from 'vue-draggable-resizable';
+// optionally import default styles
+import 'vue-draggable-resizable/dist/VueDraggableResizable.css';
+import MoEffects from './tools/mo.effects.js';
+
 export default {
   name: 'TestVideo',
+  components: { VueDraggableResizable },
   data() {
     return {
       disabledBtn: true,
@@ -77,7 +85,7 @@ export default {
         {
           id: 2,
           type: 'video',
-          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2022/02/09/29/89293c335fd78819199498f9cf7b42.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220209T084031Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20220209%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=6679bfbeb199b4e9b2c7566ca0bb1e85f176aadc253280f3e37b4a52028468bd',
+          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2022/02/17/3d/c869c7d9652159f79abcb94fb6906e.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220217T094915Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3599&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20220217%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=6f47c4236eca92546b939a04b6f1d9bf966a5ac78a6a6563307c9f8423ac2c22',
           startTime: 0,
           // endTime: 40,
           duration: undefined
@@ -85,7 +93,7 @@ export default {
         {
           id: 1,
           type: 'video',
-          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2022/02/09/d8/359b3294d12c65836a2201f3d81c21.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220209T084031Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20220209%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=a6f9289f1186494e6608ec83ec894b1cb25b3d25c4ed39d0a44cefd8f3df3313',
+          src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2022/02/17/81/237cb5cae01bece899482687352b0c.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220217T094851Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20220217%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=0b32d805d719eea3261240491bfacf671c1cba16571a3b8fb8d6d2597283bfa5',
           startTime: 9000,
           // endTime: 30,
           duration: undefined // 单位毫秒
@@ -254,9 +262,26 @@ export default {
           let canvasY = this.canvasDom.height / 2 - hRatio / 2;
           this.canvasContext.drawImage(videoDom, 0, canvasY, this.canvasDom.width, hRatio);
         }
+        this.testEffects(videoDom);
       }, 16);
       this.mediaTimer.push(timer);
       console.log('this.mediaTimer===>>>', this.mediaTimer);
+    },
+    /**
+     * 转场效果
+     */
+    testEffects(dom) {
+      MoEffects.animate(document.getElementsByClassName('preview-wrap')[0], dom, {
+        // width: this.previewParam.width,
+        // height: this.previewParam.height,
+        width: this.canvasDom.width,
+        height: this.canvasDom.height,
+        duration: 500,
+        easing: 'Wheel'
+      });
+      setTimeout(() => {
+        if (document.getElementsByTagName('figure')) document.getElementsByTagName('figure')[0].style.display = 'none';
+      }, 1000);
     }
   },
   mounted() {
@@ -288,15 +313,14 @@ export default {
   height: 500px;
   overflow: hidden;
   border: 1px solid;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .preview-wrap {
   position: relative;
   width: 1280px;
   height: 720px;
+  left: 50%;
+  transform-origin: 0 0;
   // margin: 0 auto;
 }
 
@@ -311,5 +335,6 @@ export default {
 
 #myCanvas {
   position: absolute;
+  left: 0;
 }
 </style>

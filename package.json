@@ -14,6 +14,7 @@
     "regl": "^2.1.0",
     "regl-transition": "^1.13.4",
     "vue": "^2.6.11",
+    "vue-draggable-resizable": "^2.3.0",
     "vue-gl-transitions": "^0.1.6",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"

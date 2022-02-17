@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1" />
+    <title>视频在 canvas 和 webgl 中播放</title>
+    <style type="text/css">
+      div#cube_player {
+        border: 1px solid yellow;
+        cursor: pointer;
+        background-color: #eeeeee;
+      }
+    </style>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script type="text/javascript" src="http://jeromeetienne.github.io/jquery-qrcode/jquery.qrcode.min.js"></script>
+    <script type="text/javascript" src="https://threejs.org/build/three.js"></script>
+    <script type="text/javascript">
+      function CanvasVideo(element, settings) {
+        this.element = document.querySelector(element);
+        this.settings = this.$getSettings(settings);
+        this.$init();
+      }
+
+      CanvasVideo.prototype.$getSettings = function (settings) {
+        var attr, key;
+        if (!settings) {
+          attr = this.element.getAttribute('canvas-video');
+          attr = attr.replace(/\'/g, '"');
+          settings = JSON.parse(attr);
+        }
+        var options = {};
+        for (key in settings) {
+          if (settings.hasOwnProperty(key)) options[key] = settings[key];
+        }
+        return options;
+      };
+
+      CanvasVideo.prototype.$init = function () {
+        var _this = this;
+
+        // video = document.createElement('video');
+        video = document.getElementById('videoDom');
+        this.video = video;
+        //this.element.appendChild(video);
+
+        video.setAttribute('loop', '');
+        video.setAttribute('autoplay', '');
+        video.setAttribute('controls', '');
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('width', this.settings.width);
+        video.setAttribute('height', this.settings.height);
+        video.setAttribute('crossOrigin', 'anonymous');
+
+        if (this.settings.poster) video.poster = this.settings.poster;
+
+        // if (this.settings.srcs) {
+        //   this.settings.srcs.forEach(function (st) {
+        //     var vs = document.createElement('source');
+        //     vs.src = st.src;
+        //     vs.type = st.type;
+        //     video.appendChild(vs);
+        //   });
+        // }
+
+        var wrapper = document.createElement('div');
+        this.element.appendChild(wrapper);
+        canvas = document.createElement('canvas');
+        wrapper.appendChild(canvas);
+        canvas.setAttribute('width', this.settings.width);
+        canvas.setAttribute('height', this.settings.height);
+        var canvasContext = canvas.getContext('2d');
+        canvasContext.fillStyle = '#ffffff';
+        canvasContext.fillRect(0, 0, this.settings.width, this.settings.height);
+        canvasContext.drawImage(video, 0, 0, this.settings.width, this.settings.height);
+        this.canvasContext = canvasContext;
+
+        wrapper.appendChild(document.createElement('p'));
+
+        var playBtn = document.createElement('button');
+        wrapper.appendChild(playBtn);
+        this.playBtn = playBtn;
+        playBtn.innerHTML = 'play';
+        playBtn.onclick = function () {
+          if (_this.video.paused) _this.play();
+          else _this.pause();
+        };
+
+        var curTime = document.createElement('span');
+        wrapper.appendChild(curTime);
+        this.curTime = curTime;
+
+        wrapper.appendChild(document.createElement('p'));
+
+        'durationchange,loadedmetadata,timeupdate,play,pause'.split(',').forEach(function (n) {
+          video.addEventListener(
+            n,
+            function (e) {
+              switch (e.type) {
+                case 'play':
+                  _this.canvasDrawFrame();
+                  _this.$drawTimer = setInterval(function () {
+                    _this.canvasDrawFrame();
+                  }, 30);
+                  _this.playBtn.innerHTML = 'pause';
+                  break;
+                case 'pause':
+                  _this.canvasDrawFrame();
+                  if (_this.$drawTimer) {
+                    clearInterval(_this.$drawTimer);
+                    _this.$drawTimer = null;
+                  }
+                  _this.playBtn.innerHTML = 'play';
+                  break;
+                case 'durationchange':
+                case 'loadedmetadata':
+                case 'timeupdate':
+                  _this.curTime.innerHTML = ' ' + _this.video.currentTime + '/' + _this.video.duration;
+                  break;
+              }
+            },
+            true
+          );
+        });
+      };
+
+      CanvasVideo.prototype.canvasDrawFrame = function () {
+        this.canvasContext.drawImage(this.video, 0, 0, this.settings.width, this.settings.height);
+        cube_draw();
+      };
+
+      CanvasVideo.prototype.play = function () {
+        this.video.play();
+      };
+
+      CanvasVideo.prototype.pause = function () {
+        this.video.pause();
+      };
+
+      var video, texture, scene, camera, cube, renderer;
+
+      function cube_draw() {
+        if (!renderer) return;
+
+        texture.needsUpdate = true;
+        // animate the cube
+        cube.rotation.x += 0.02;
+        cube.rotation.y += 0.0225;
+        cube.rotation.z += 0.0175;
+        // actually display the scene in the Dom element
+        renderer.render(scene, camera);
+      }
+
+      // see: http://learningthreejs.com/data/lets_do_a_cube/lets_do_a_cube.html
+      function cubePlayerInit() {
+        var cp = document.getElementById('cube_player');
+
+        var w = cp.clientWidth;
+        var h = cp.clientHeight;
+
+        // create the camera
+        camera = new THREE.Camera(75, w / h, 1, 1000);
+        camera.position.z = 1;
+
+        // create the Scene
+        scene = new THREE.Scene();
+
+        // load a texture from video, set wrap mode to repeat
+        texture = new THREE.Texture(video);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 1);
+
+        // create the Cube
+        var cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+        var material = new THREE.MeshLambertMaterial({ map: texture, shading: THREE.FlatShading });
+        cube = new THREE.Mesh(cubeGeometry, material);
+
+        // soft white light
+        var light = new THREE.AmbientLight('rgb(255,255,255)');
+        scene.add(light);
+
+        // add the object to the scene
+        scene.add(cube);
+
+        // init the WebGL renderer and append it to the Dom
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setClearColor(0xeeeeee, 1);
+        renderer.setSize(w, h);
+
+        cp.appendChild(renderer.domElement);
+
+        cube_draw();
+      }
+
+      function onBodyLoad() {
+        var cv = new CanvasVideo('#player');
+        cubePlayerInit();
+        // $('#doc_url').qrcode(document.URL);
+        console.log('three.js version: ' + THREE.REVISION);
+      }
+
+      // http://craftymind.com/factory/html5video/BigBuckBunny_640x360.mp4
+    </script>
+  </head>
+  <body onload="onBodyLoad();">
+    <div
+      id="player"
+      canvas-video="{'srcs': [{'src': 'http://localhost:2022/portal/media/1.97920397.mp4', 'type': 'video/mp4'}], 'width': 352, 'height': 288}"
+    ></div>
+    <video id="videoDom" src="1.mp4" playsinline loop controls width="300" height="300"></video>
+    <div id="cube_player" style="width: 352px; height: 288px"></div>
+    <div id="doc_url"></div>
+  </body>
+</html>

@@ -48,9 +48,10 @@ export default {
     const videos = this.videoSrcs.map(createVedio);
     setTimeout(() => {
       // 延迟一下，等video加载完
-      let tick = regl.frame(({ time }) => {
+      // let tick = regl.frame(({ time }) => {
+      regl.frame(({ time }) => {
+        // regl.texture(videos[0]).subimage(videos[0]);
         const slides = videos.map((video) => regl.texture(video).subimage(video));
-        console.log('slides====>>>', slides);
         const index = Math.floor(time / (delay + duration));
         const from = slides[index % slides.length];
         const to = slides[(index + 1) % slides.length];
@@ -58,7 +59,9 @@ export default {
         const progress = Math.max(0, (time - index * total - delay) / duration);
         transitionFunc({ progress, from, to });
       });
-      tick.cancel();
+      // setTimeout(() => {
+      //   tick.cancel();
+      // }, 1500);
     }, 1000);
   }
 };
