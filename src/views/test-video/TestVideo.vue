@@ -17,7 +17,14 @@
             @dragstop="(x, y) => subtitleOnDrag(item, x, y)"
             :parent="true"
           >
-            <div v-html="item.style"></div>
+            <template v-if="item.type == 'img'">
+              <div class="charlet animate__animated animate__repeat-1">
+                <img :src="item.src" alt="" width="100" height="100" />
+              </div>
+            </template>
+            <template v-else>
+              <div v-html="item.style"></div>
+            </template>
           </vue-draggable-resizable>
         </template>
       </div>
@@ -32,6 +39,24 @@
       <Button type="text" @click="jumpSecond">跳转</Button>
       <Button @click="testEffects">测试</Button>
       <!-- <Button @click="huitui">回退到第5秒</Button> -->
+      <br />
+      <Select style="width: 100px; margin-left: 10px" placeholder="请选择动画" @on-change="setAnimate">
+        <Option v-for="item in animateList" :value="item.value" :key="item.value">{{ item.name }}</Option>
+      </Select>
+      <Select
+        style="width: 100px; margin-left: 10px"
+        placeholder="动画时长"
+        @on-change="setAnimateConfig('duration', $event)"
+      >
+        <Option v-for="item in animateDurationList" :value="item.value" :key="item.value">{{ item.name }}</Option>
+      </Select>
+      <Select
+        style="width: 100px; margin-left: 10px"
+        placeholder="动画次数"
+        @on-change="setAnimateConfig('repeat', $event)"
+      >
+        <Option v-for="item in animateRepeatList" :value="item.value" :key="item.value">{{ item.name }}</Option>
+      </Select>
     </div>
 
     <div class="media-list-wrap">
@@ -64,6 +89,8 @@ import VueDraggableResizable from 'vue-draggable-resizable';
 import 'vue-draggable-resizable/dist/VueDraggableResizable.css';
 import MoEffects from './tools/mo.effects.js';
 
+import 'animate.css';
+
 export default {
   name: 'TestVideo',
   components: { VueDraggableResizable },
@@ -81,6 +108,60 @@ export default {
       canvasContext: undefined,
       timer: null,
       jumpTimeSecond: 0,
+
+      currentAnimate: '', // 当前动画效果
+      // 动画配置
+      animateMap: {
+        duration: '--animate-duration',
+        repeat: '--animate-repeat'
+      },
+      animateList: [
+        {
+          name: '无',
+          value: 'null'
+        },
+        {
+          name: '心跳',
+          value: 'animate__heartBeat'
+        },
+        {
+          name: '上下移动',
+          value: 'animate__shakeY'
+        }
+      ],
+      animateDurationList: [
+        {
+          name: '1s',
+          value: '1s'
+        },
+        {
+          name: '2s',
+          value: '2s'
+        },
+        {
+          name: '0.5s',
+          value: '0.5s'
+        }
+      ],
+      animateRepeatList: [
+        {
+          name: '1次',
+          value: '1'
+        },
+        {
+          name: '2次',
+          value: '2'
+        },
+        {
+          name: '3次',
+          value: '3'
+        },
+        {
+          name: '无限',
+          value: 'animate__infinite'
+        }
+      ],
+
       demoList: [
         {
           id: 2,
@@ -98,14 +179,6 @@ export default {
           // endTime: 30,
           duration: undefined // 单位毫秒
         }
-        // {
-        //   id: 3,
-        //   type: 'audio',
-        //   src: 'https://addct-data-prod.s3.cn-north-1.jdcloud-oss.com/res/v/2021/09/06/b6/a576ed7c8a1356ab7b390710e0fd77.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20210906T062321Z&X-Amz-SignedHeaders=host&X-Amz-Expires=129600&X-Amz-Credential=EC6C989A6F53CFD5E7624212C554ECB6%2F20210906%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Signature=530da3f9f56734dcd644b9a53c186fed496cb3e293efde308c84ec8ed4afc3db',
-        //   startTime: 20000,
-        //   // endTime: undefined,
-        //   duration: undefined
-        // }
       ],
       subtitles: [
         {
@@ -126,6 +199,15 @@ export default {
           y: 0,
           startTime: 20000,
           duration: 5000
+        },
+        {
+          id: 3,
+          type: 'img',
+          src: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fi-1-lanrentuku.qqxzb-img.com%2F2020%2F11%2F23%2F3f0c0f39-f17a-4b7c-8536-7b8a290dcacc.jpg%3FimageView2%2F2%2Fw%2F1024%2F&refer=http%3A%2F%2Fi-1-lanrentuku.qqxzb-img.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1647686415&t=3abbfcc8ab9c0ce757e4321fee63a5d5',
+          x: 0,
+          y: 100,
+          startTime: 0,
+          duration: 20000
         }
       ]
     };
@@ -145,6 +227,36 @@ export default {
     }
   },
   methods: {
+    // 设置动画
+    setAnimate(animate) {
+      // if (this.currentAnimate == animate) {
+      //   return;
+      // }
+      const element = document.querySelector('.charlet');
+      this.currentAnimate && element.classList.remove(this.currentAnimate);
+      if (animate) {
+        this.currentAnimate = animate;
+        this.$nextTick(() => {
+          element.classList.add('animate__animated', animate);
+        });
+      }
+    },
+    // 设置动画属性
+    setAnimateConfig(type, value) {
+      const element = document.querySelector('.charlet');
+      // element.style.setProperty('--animate-duration', '0.5s');
+      if (type == 'repeat' && value == 'animate__infinite') {
+        // 设置无限次
+        element.classList.remove('animate__repeat-1');
+        element.classList.add(value);
+        return;
+      } else if (type == 'repeat') {
+        element.classList.remove('animate__infinite');
+        element.classList.add('animate__repeat-1');
+      }
+      element.style.setProperty(this.animateMap[type], value);
+      this.currentAnimate && this.setAnimate(this.currentAnimate);
+    },
     // 跳转到第几秒
     jumpSecond() {
       this.playingTime = this.jumpTimeSecond * 1000;
