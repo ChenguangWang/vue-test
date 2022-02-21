@@ -32,6 +32,11 @@ const routes = [
     path: '/testRegl',
     name: 'testRegl',
     component: () => import('@/views/test-regl/TestRegl.vue')
+  },
+  {
+    path: '/testSplitPanel',
+    name: 'testSplitPanel',
+    component: () => import('@/views/test-split-panel/TestSplitPanel.vue')
   }
 ];
 
