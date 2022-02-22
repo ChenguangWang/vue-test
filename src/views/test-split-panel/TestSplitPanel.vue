@@ -1,6 +1,8 @@
 <template>
   <div>
-    <Split ref="mySplit" class="split-wrap" direction="vertical" :gutterSize="5" :snapOffset="10">
+    <!-- snapOffset 吸附 -->
+    <!-- gutterSize 拖拽线的高度 -->
+    <Split ref="mySplit" class="split-wrap" direction="vertical" :gutterSize="5" :snapOffset="5">
       <SplitArea :size="33" :minSize="50"> panel left </SplitArea>
       <SplitArea :size="33" :minSize="50"> panel center </SplitArea>
       <SplitArea :size="33" :minSize="50"> panel right </SplitArea>
