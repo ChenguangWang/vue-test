@@ -91,6 +91,8 @@ import GLTransitions from 'gl-transitions';
 import createREGL from 'regl';
 import createREGLTransition from 'regl-transition';
 
+import { drawVideo } from './tools/reglDraw';
+
 import 'animate.css';
 
 export default {
@@ -110,6 +112,8 @@ export default {
       canvasContext: undefined,
       timer: null,
       jumpTimeSecond: 0,
+
+      reglFrame: undefined,
 
       currentAnimate: '', // 当前动画效果
       // 动画配置
@@ -270,8 +274,16 @@ export default {
       data.y = y;
       console.log('字幕拖拽后的元素====>>>', data);
     },
-    // 播放
     preview() {
+      this.mediaDoms[0].play();
+      const regl = createREGL(document.querySelector('canvas'));
+      const texture = regl.texture(this.mediaDoms[0]);
+      this.reglFrame = regl.frame(() => {
+        drawVideo(regl)({ video: texture.subimage(this.mediaDoms[0]) });
+      });
+    },
+    // 播放
+    preview1() {
       let that = this;
       let remainderTime = that.durationTotal - that.playingTime;
       if (remainderTime < 1000) {
@@ -410,9 +422,15 @@ export default {
   },
   mounted() {
     this.canvasDom = document.getElementById('myCanvas');
-    this.canvasContext = this.canvasDom.getContext('webgl');
+    // this.canvasContext = this.canvasDom.getContext('webgl');
+    const regl = createREGL(document.querySelector('canvas'));
     // 默认绘制全黑
-    this.canvasContext.fillRect(0, 0, this.canvasDom.width, this.canvasDom.height);
+    // this.canvasContext.fillRect(0, 0, this.canvasDom.width, this.canvasDom.height);
+    regl.clear({
+      color: [0, 0, 0, 1],
+      depth: 1
+    });
+
     // this.videoDom.width = window.innerWidth * 2; //获取屏幕宽度作为canvas的宽度  这个设置的越大，画面越清晰（相当于绘制的图像大，然后被css缩小）
     // this.videoDom.height = window.innerHeight * 2;
     // this.draw1();
@@ -427,6 +445,9 @@ export default {
         };
       });
     });
+  },
+  destroyed() {
+    this.reglFrame && this.reglFrame.cancel();
   }
 };
 </script>
