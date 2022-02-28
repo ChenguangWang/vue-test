@@ -16,6 +16,7 @@
     "iview": "^3.5.4",
     "regl": "^2.1.0",
     "regl-transition": "^1.13.4",
+    "resl": "^1.0.3",
     "vue": "^2.6.11",
     "vue-draggable-resizable": "^2.3.0",
     "vue-gl-transitions": "^0.1.6",
