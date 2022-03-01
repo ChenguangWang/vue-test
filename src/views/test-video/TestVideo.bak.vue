@@ -277,7 +277,10 @@ export default {
     preview() {
       this.mediaDoms[0].play();
       const regl = createREGL(document.querySelector('canvas'));
-      const texture = regl.texture(this.mediaDoms[0]);
+      const texture = regl.texture({
+        flipY: true,
+        data: this.mediaDoms[0]
+      });
       this.reglFrame = regl.frame(() => {
         drawVideo(regl)({ video: texture.subimage(this.mediaDoms[0]) });
       });

@@ -32,7 +32,6 @@ export const drawVideo = (regl) => {
     }`,
     // gl_Position = vec4((1.0 - 2.0 * position) * 0.2, 0, 1);
     attributes: {
-      // position: [0, -2, -2, 0, 2, 2]
       position: [-2, 0, 0, -2, 2, 2]
     },
 
