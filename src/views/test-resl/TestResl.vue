@@ -1,6 +1,6 @@
 <template>
   <div>
-    <canvas id="reslCanvas"></canvas>
+    <canvas id="reslCanvas" width="600" height="500"></canvas>
   </div>
 </template>
 
@@ -19,20 +19,10 @@ export default {
     uniform vec2 screenShape;
     uniform float time;
     varying vec2 uv;
-    vec4 background () {
-      vec2 pos = 0.5 - gl_FragCoord.xy / screenShape;
-      float r = length(pos);
-      float theta = atan(pos.y, pos.x);
-      return vec4(
-        cos(pos.x * time) + sin(pos.y * pos.x * time),
-        cos(100.0 * r * cos(0.3 * time) + theta),
-        sin(time / r + pos.x * cos(10.0 * time + 3.0)),
-        1);
-    }
     void main () {
       vec4 color = texture2D(texture, uv);
       float chromakey = step(0.15 + max(color.r, color.b), color.g);
-      gl_FragColor = mix(color, background(), chromakey);
+      gl_FragColor = color;
     }`,
 
       vert: `
@@ -66,14 +56,19 @@ export default {
       },
       onDone: ({ video }) => {
         document.body.appendChild(video);
-        video.autoplay = true;
+        // video.autoplay = true;
         // video.loop = true;
         video.load();
         document.addEventListener('click', () => {
           console.log('click');
           video.play();
-          const texture = regl.texture(video);
+          const texture = regl.texture({ height: 300, width: 200, data: video });
           regl.frame(() => {
+            // clear contents of the drawing buffer
+            regl.clear({
+              color: [0, 0, 0, 1],
+              depth: 1
+            });
             drawDoggie({ video: texture.subimage(video) });
           });
         });
