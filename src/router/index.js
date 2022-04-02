@@ -21,7 +21,7 @@ const routes = [
   {
     path: '/testVideo',
     name: 'testVideo',
-    component: () => import('@/views/test-video/TestVideo.bak.vue')
+    component: () => import('@/views/test-video/TestVideo.vue')
   },
   {
     path: '/testGl',
@@ -42,6 +42,11 @@ const routes = [
     path: '/testSplitPanel',
     name: 'testSplitPanel',
     component: () => import('@/views/test-split-panel/TestSplitPanel.vue')
+  },
+  {
+    path: '/learnThree',
+    name: 'learnThree',
+    component: () => import('@/views/learn-three/LearnThree.vue')
   }
 ];
 

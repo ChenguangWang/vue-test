@@ -10,7 +10,7 @@ module.exports = {
   transpileDependencies: ['vue-particles', 'vue-echarts', 'iview'],
   productionSourceMap: false,
   configureWebpack: {
-    devtool: 'source-map'
+    devtool: 'cheap-module-eval-source-map'
   },
   chainWebpack: (config) => {
     // 别名

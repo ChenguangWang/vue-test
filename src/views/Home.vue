@@ -11,6 +11,8 @@
     <router-link to="/testSplitPanel">Split-Panel测试</router-link>
     <br />
     <router-link to="/testResl">Resl测试</router-link>
+    <br />
+    <router-link to="/learnThree">learnThree</router-link>
   </div>
 </template>
 
