@@ -47,6 +47,11 @@ const routes = [
     path: '/learnThree',
     name: 'learnThree',
     component: () => import('@/views/learn-three/LearnThree.vue')
+  },
+  {
+    path: '/virtual-grid',
+    name: 'virtual-grid',
+    component: () => import('@/views/virtual-grid/VirtualGrid.vue')
   }
 ];
 
