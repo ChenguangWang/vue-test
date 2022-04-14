@@ -52,6 +52,11 @@ const routes = [
     path: '/virtual-grid',
     name: 'virtual-grid',
     component: () => import('@/views/virtual-grid/VirtualGrid.vue')
+  },
+  {
+    path: '/test-drag',
+    name: 'test-drag',
+    component: () => import('@/views/dragAndDrop/TestDrag.vue')
   }
 ];
 

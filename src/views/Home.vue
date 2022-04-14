@@ -15,6 +15,8 @@
     <router-link to="/learnThree">learnThree</router-link>
     <br />
     <router-link to="/virtual-grid">virtual-grid</router-link>
+    <br />
+    <router-link to="/test-drag">test-drag</router-link>
   </div>
 </template>
 
