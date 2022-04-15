@@ -1,19 +1,19 @@
 export default {
   containerMap: {
     hunjian: {
-      materialType: 'video',
+      containerType: 'video',
       materialData: []
     },
     duli: {
-      materialType: 'video',
+      containerType: 'video',
       materialData: []
     },
     ai: {
-      materialType: 'audio',
+      containerType: 'audio',
       materialData: []
     },
     bgm: {
-      materialType: 'audio',
+      containerType: 'audio',
       materialData: []
     }
   }

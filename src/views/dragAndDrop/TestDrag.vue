@@ -4,7 +4,7 @@
       <div class="item-container">
         <draggable
           v-for="item in videoContainerList"
-          :key="item.value"
+          :key="item.value.name"
           :data="item.value"
           @dragstart="onSourceDragStart"
           @dragsend="onSourceDragEnd"
@@ -15,7 +15,7 @@
       <div class="item-container">
         <draggable
           v-for="item in audioContainerList"
-          :key="item.value"
+          :key="item.value.name"
           :data="item.value"
           @dragstart="onSourceDragStart"
           @dragsend="onSourceDragEnd"
@@ -27,7 +27,39 @@
 
     <div class="content">
       <div class="track-list">
-        <div class="track-item" v-for="(item, index) in trackList" :key="index">每条容器轨道</div>
+        <droppable
+          class="track-item"
+          :class="{ 'track-tip': dragContainerType == track.containerType }"
+          v-for="(track, index) in trackList"
+          :key="index"
+          @dragenter="onTrackDragEnter($event, track)"
+          @drop="onTrackDrop($event, track)"
+        >
+          <vue-draggable-resizable
+            v-for="(item, index) in track.materialData"
+            :key="index"
+            class="track-drag"
+            class-name-active="track-drag-active"
+            class-name-handle="track-handle-class"
+            :w="item.trackWidth"
+            :h="40"
+            :x="item.trackX"
+            :parent="true"
+            :debug="false"
+            :handles="['ml', 'mr']"
+            :isConflictCheck="true"
+            :snap="true"
+            :snapTolerance="10"
+          >
+            <!-- :onResize="onResizeCallback" -->
+            <!-- @dragstop="onDrag" -->
+            <!-- @resizestop="onResizeEnd" -->
+            <!-- @activated="activatedSelect(item, key)" -->
+            {{ item.name }}
+            <div slot="mr">|</div>
+            <div slot="ml">|</div>
+          </vue-draggable-resizable>
+        </droppable>
       </div>
       <droppable
         class="drop-area"
@@ -38,7 +70,7 @@
         @dragover="onDragOver"
         @dragleave="onDragLeave"
       >
-        <div v-show="showTrakTip" class="track-pane-tip">这里是底部工具预览，用于新增容器轨道</div>
+        <div v-show="showTrakTip" class="track-pane-tip"></div>
       </droppable>
     </div>
   </div>
@@ -49,33 +81,51 @@ import Draggable from '@/components/dnd/draggable'; // form后面的地址根据
 import Droppable from '@/components/dnd/droppable'; // form后面的地址根据实际情况而定
 import Const from './const';
 
+// 拖拽组件
+import VueDraggableResizable from 'vue-draggable-resizable-gorkys';
+import 'vue-draggable-resizable-gorkys/dist/VueDraggableResizable.css';
+
 export default {
   components: {
     Draggable,
-    Droppable
+    Droppable,
+    VueDraggableResizable
   },
   data() {
     return {
       showTrakTip: false, // 展示轨道提示
+      dragContainerType: undefined, // 拖动的容器类型
       trackList: [], // 轨道列表
       videoContainerList: [
         {
           name: '混剪视频',
-          value: 'hunjian'
+          value: {
+            name: 'hunjian',
+            type: 'video'
+          }
         },
         {
           name: '独立视频',
-          value: 'duli'
+          value: {
+            name: 'duli',
+            type: 'video'
+          }
         }
       ],
       audioContainerList: [
         {
           name: 'AI语音',
-          value: 'ai'
+          value: {
+            name: 'ai',
+            type: 'audio'
+          }
         },
         {
           name: 'BGM',
-          value: 'bgm'
+          value: {
+            name: 'bgm',
+            type: 'audio'
+          }
         }
       ]
     };
@@ -112,6 +162,7 @@ export default {
     onSourceDragStart(params) {
       console.log('被拖动元素监听到拖动开始', params);
       this.showTrakTip = true;
+      this.dragContainerType = params.data.type;
     },
 
     onSourceDragEnd(params) {
@@ -124,25 +175,48 @@ export default {
     onDragEnd(params, type) {
       console.log('监听到拖动结束', type);
       this.showTrakTip = false;
+      this.dragContainerType = undefined;
     },
+    // 拖动容器到底部
     onDrop(params, type) {
       console.log('监听到被拖动元素放下', params, type);
       params.methods.removeDragedNode('fade');
-      let container = Const.containerMap[params.data];
-
-      // 创建轨道盒子
-      let trackDom = document.createElement('div');
-      trackDom.setAttribute('class', 'track-wrap');
-
-      let containerDom = document.createElement('div');
-      containerDom.setAttribute('class', 'container-wrap');
-      containerDom.innerHTML = container['materialType'] || '没有配置const';
-      trackDom.insertAdjacentElement('beforeend', containerDom);
-      // let newNode = params.sourceNode.cloneNode(true);
-      params.el.insertAdjacentElement('afterbegin', trackDom);
+      let container = Const.containerMap[params.data.name];
+      // 容器元素
+      container.materialData.push({
+        name: params.data.name,
+        trackWidth: 100,
+        trackX: 0
+      });
+      // 先创建轨道，再添加元素
+      this.trackList.push(container);
+    },
+    // 拖动容器到轨道
+    onTrackDrop(params, track) {
+      console.log('轨道监听到被拖动元素放下', params);
+      // 轨道类型和拖拽的容器类型一致
+      if (track.containerType == params.data.type) {
+        params.methods.removeDragedNode('fade');
+        let trackX = 0;
+        track.materialData.forEach((element) => {
+          trackX += element.trackWidth;
+        });
+        const len = track.materialData.length;
+        track.materialData.push({
+          name: params.data.name,
+          trackWidth: 100,
+          trackX
+        });
+      } else {
+        params.methods.removeDragedNode('back');
+      }
     },
     onDragEnter(params, type) {
       console.log('监听到被拖动元素进入当前范围', type);
+    },
+    // 拖动容器到轨道范围
+    onTrackDragEnter(params, track) {
+      console.log('轨道监听到被拖动元素进入当前范围', params, track);
     },
     onDragOver(params, type) {
       // console.log('监听到被拖动元素在上方移动, 这个调用调多次就不打印了')
@@ -178,11 +252,20 @@ export default {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  .drop-area {
+    flex: 1 1;
+    min-height: 100px;
+  }
 }
 
-.drop-area {
-  flex: 1 1;
-  min-height: 100px;
+.track-item {
+  height: 40px;
+  line-height: 40px;
+  border: 1px dashed greenyellow;
+  margin: 8px 0;
+  &.track-tip {
+    background: #eef3fe;
+  }
 }
 
 .content {
@@ -191,14 +274,6 @@ export default {
     width: 100%;
     background: #eef3fe;
     border-radius: 4px;
-  }
-  /deep/ .track-wrap {
-    display: inline-block;
-    width: 100%;
-    height: 40px;
-    line-height: 40px;
-    border: 1px dashed greenyellow;
-    margin: 8px 0;
   }
   /deep/ .container-wrap {
     display: inline-block;
@@ -215,5 +290,56 @@ export default {
   margin: 10px;
   padding: 5px 10px;
   box-sizing: border-box;
+}
+
+.track-drag {
+  border-radius: 4px;
+  padding: 0 10px;
+  border: 1px solid #dee0e6 !important;
+  background: #fff;
+  .dot-dot {
+    display: inline-block;
+    line-height: 32px;
+    width: 100%;
+    padding: 0 12px;
+    color: #fff;
+    &.video-track {
+      color: #808695;
+    }
+  }
+  .img-track {
+    height: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+    text-align: center;
+  }
+}
+
+.track-drag-active {
+  border-color: #0300ff !important;
+  box-shadow: 0px 1px 3px 0px rgba(3, 0, 255, 0.6);
+}
+/deep/ .track-handle-class {
+  position: absolute;
+  color: #fff;
+  background-color: #0300ff;
+  border: 1px solid #0300ff;
+  height: 14px !important;
+  -webkit-transition: all 300ms linear;
+  -ms-transition: all 300ms linear;
+  transition: all 300ms linear;
+  top: 0 !important;
+  height: 38px !important;
+  line-height: 40px;
+  text-align: center;
+  &-ml {
+    left: 0px !important;
+    cursor: w-resize;
+  }
+
+  &-mr {
+    right: 0px !important;
+    cursor: e-resize;
+  }
 }
 </style>
