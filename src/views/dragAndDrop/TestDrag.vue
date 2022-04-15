@@ -50,11 +50,11 @@
             :isConflictCheck="true"
             :snap="true"
             :snapTolerance="10"
+            :onResize="onResizeCallback"
+            @dragstop="onContainerDrag"
+            @resizestop="onResizeEnd"
+            @activated="activatedSelect(item)"
           >
-            <!-- :onResize="onResizeCallback" -->
-            <!-- @dragstop="onDrag" -->
-            <!-- @resizestop="onResizeEnd" -->
-            <!-- @activated="activatedSelect(item, key)" -->
             {{ item.name }}
             <div slot="mr">|</div>
             <div slot="ml">|</div>
@@ -80,6 +80,7 @@
 import Draggable from '@/components/dnd/draggable'; // form后面的地址根据实际情况而定// form后面的地址根据实际情况而定
 import Droppable from '@/components/dnd/droppable'; // form后面的地址根据实际情况而定
 import Const from './const';
+import cloneDeep from 'lodash/cloneDeep';
 
 // 拖拽组件
 import VueDraggableResizable from 'vue-draggable-resizable-gorkys';
@@ -95,6 +96,7 @@ export default {
     return {
       showTrakTip: false, // 展示轨道提示
       dragContainerType: undefined, // 拖动的容器类型
+      activatedContainer: undefined, // 选中的容器
       trackList: [], // 轨道列表
       videoContainerList: [
         {
@@ -132,31 +134,33 @@ export default {
   },
 
   methods: {
-    createTrackDrop(element) {
-      const that = this;
-      /* eslint-disable */
-      new Drop(element, {
-        onDragStart(params) {
-          console.log('11监听到拖动开始');
-        },
-        onDragEnter(params) {
-          console.log('11监听到被拖元素进入');
-        },
-        onDragOver(params) {
-          console.log('11监听到被拖动元素在自己上方移动');
-          console.log('11这个函数会被连续调用');
-        },
-        onDragLeave(params) {
-          console.log('11监听被拖动元素离开');
-        },
-        onDrop(params) {
-          console.log('11监听到被拖动元素在自己上方放下');
-          that.onDrop(params, 'hadTrack');
-        },
-        onDragEnd(params) {
-          console.log('11监听到拖动结束');
-        }
-      });
+    /**
+     * 容器拖动大小 实时触发
+     * The function receives the handle and the next values of x, y, width and height.
+     * If false is returned by any handler, the action will cancel.
+     */
+    onResizeCallback(handle, x, y, w) {
+      return true;
+    },
+
+    /**
+     * 容器元素拖拽事件
+     */
+    onContainerDrag(x, y) {
+      console.log('容器元素拖拽事件', x, y);
+    },
+    /**
+     * 容器改变长度
+     */
+    onResizeEnd(x, y, w) {
+      console.log('容器改变长度', x, y, w, this.activatedContainer);
+      this.activatedContainer.trackWidth = w;
+    },
+    /**
+     * 容器item选中触发
+     */
+    activatedSelect(item) {
+      this.activatedContainer = item;
     },
 
     onSourceDragStart(params) {
@@ -181,7 +185,7 @@ export default {
     onDrop(params, type) {
       console.log('监听到被拖动元素放下', params, type);
       params.methods.removeDragedNode('fade');
-      let container = Const.containerMap[params.data.name];
+      let container = cloneDeep(Const.containerMap[params.data.name]);
       // 容器元素
       container.materialData.push({
         name: params.data.name,

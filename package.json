@@ -15,6 +15,7 @@
     "gl-transition": "^1.13.0",
     "gl-transitions": "^1.43.0",
     "iview": "^3.5.4",
+    "lodash": "^4.17.21",
     "regl": "^2.1.0",
     "regl-transition": "^1.13.4",
     "resl": "^1.0.3",
